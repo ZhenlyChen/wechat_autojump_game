@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	g "github.com/sundy-li/wechat_autojump_game"
+	g "github.com/ZhenlyChen/wechat_autojump_game"
 )
 
 var (
@@ -22,6 +22,8 @@ func main() {
 	if mills != 0 {
 		g.SleepMills = time.Duration(mills)
 	}
+	fmt.Println("请输入跳跃的倍率（参考值1.5 - 2.5）：")
+	fmt.Scanf("%f", speed)
 	if speed != 0 {
 		g.Speed = speed
 	}

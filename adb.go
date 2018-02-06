@@ -10,10 +10,8 @@ import (
 )
 
 var (
-	SCREEN_WIDTH  = 1080
-	SCREEN_HEIGHT = 1920
-	//这个系数好难调,好像不同机型不一样...
-	Speed float64 = 1.392
+	// Speed 跳跃距离的倍率，不同手机可能要手动调
+	Speed float64 = 2
 )
 
 func jump(distance float64) {
@@ -30,15 +28,16 @@ func saveScreenShot(filename string) {
 
 func runAdb(args ...string) {
 	var b bytes.Buffer
-	cmd := exec.Command("adb", args...)
+	cmd := exec.Command(".\\adb.exe", args...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
-	log.Printf("adb %s", strings.Join(args, " "))
+	// log.Printf("adb %s", strings.Join(args, " "))
 	err := cmd.Run()
 	if cmd.Process != nil {
 		cmd.Process.Kill()
 	}
 	if err != nil {
+		fmt.Println(err)
 		log.Fatalf("adb %s: %v", strings.Join(args, " "), err.Error())
 	}
 }
