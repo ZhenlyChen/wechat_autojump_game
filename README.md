@@ -14,7 +14,7 @@ Golang实现的自动玩微信跳一跳
 - 安装方法一:
 
  一键下载安装,无需搭建环境,傻瓜化使用方法
-请在[release](https://github.com/sundy-li/wechat_autojump_game/releases) 页面下载对应操作系统的二进制压缩包,解压后,执行jump文件即可
+请在[release](https://github.com/zhenlychen/wechat_autojump_game/releases) 页面下载对应操作系统的二进制压缩包,解压后,执行jump文件即可
 
 ```
  $  ./jump 
@@ -24,8 +24,8 @@ Golang实现的自动玩微信跳一跳
 
 手动安装,开发调试
 ```
- $ go get -u github.com/sundy-li/wechat_autojump_game
- $ cd $GOPATH/src/github.com/sundy-li/wechat_autojump_game/cmd
+ $ go get -u github.com/zhenlychen/wechat_autojump_game
+ $ cd $GOPATH/src/github.com/zhenlychen/wechat_autojump_game/cmd
  $ go run main.go
 ```
 
