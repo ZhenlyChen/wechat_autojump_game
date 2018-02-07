@@ -2,3 +2,5 @@ dist
 .DS_Store
 cmd/adb.exe
 cmd/AdbWinApi.dll
+cmd/Thumbs.db
+cmd/lib/*

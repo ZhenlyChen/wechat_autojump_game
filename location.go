@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/color"
 	"math"
-	"os"
 
 	"github.com/nfnt/resize"
 )
@@ -33,7 +32,7 @@ func colorSimilar(a, b [3]int, distance float64) bool {
 func Find(pic image.Image) ([]int, []int) {
 	pic = resize.Resize(720, 0, pic, resize.Lanczos3)
 
-	if len(os.Getenv("DEBUG")) > 0 {
+	if true {
 		go SavePNG("jump.720.png", pic)
 	}
 

@@ -11,24 +11,28 @@ import (
 
 var (
 	// Speed 跳跃距离的倍率，不同手机可能要手动调
-	Speed float64 = 2
+	Speed float64 = 2.1
 )
 
-func jump(distance float64) {
+func Jump(distance float64) {
 	pressTime := distance * Speed
 	x, y := randomPosition()
 	runAdb("shell", fmt.Sprintf("input swipe %d %d %d %d %d", x, y, x, y, int(pressTime)))
 }
 
-func saveScreenShot(filename string) {
-	filePath := "/sdcard/" + filename
+func SaveScreenShot() {
+	filePath := "/sdcard/" + Filename
 	runAdb("shell", "screencap -p "+filePath)
 	runAdb("pull", filePath, ".")
 }
 
-func runAdb(args ...string) {
+func ExecAdb(args ...string) string {
+	return runAdb(args...)
+}
+
+func runAdb(args ...string) string {
 	var b bytes.Buffer
-	cmd := exec.Command(".\\adb.exe", args...)
+	cmd := exec.Command(".\\lib\\adb.exe", args...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 	// log.Printf("adb %s", strings.Join(args, " "))
@@ -40,6 +44,7 @@ func runAdb(args ...string) {
 		fmt.Println(err)
 		log.Fatalf("adb %s: %v", strings.Join(args, " "), err.Error())
 	}
+	return b.String()
 }
 
 //x : 350 - 450

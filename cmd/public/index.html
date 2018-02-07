@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="layui/css/layui.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>
+  <script src="layui/layui.all.js"></script>
+  <script src="https://cdn.bootcss.com/axios/0.17.1/axios.min.js"></script>
+  <title>Console</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+
+    body {
+      background-image: url(./background.png);
+      padding: 20px 40px;
+      overflow-y: overlay;
+      text-align: center;
+      color: white;
+    }
+
+    #app {
+      margin: auto;
+    }
+
+    .image {
+      height: 570px;
+    }
+
+    .content {
+      display: flex;
+      justify-content: center;
+    }
+
+    .image-div {
+      display: inline-block;
+      height: 600px;
+      margin-right: 30px;
+    }
+
+    .control {
+      display: inline-block;
+      margin-left: 30px;
+    }
+
+    .log {
+      width: 450px;
+      height: 184px;
+      background: black;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: left;
+      margin-top: 22px;
+      overflow: auto;
+    }
+
+    .layui-elem-field {
+      text-align: left;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .data-box {
+      height: 150px;
+      font-size: 20px;
+    }
+
+    .data-box>p {
+      margin-bottom: 10px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="content">
+      <div class="image-div">
+        <fieldset class="layui-elem-field">
+          <legend>Real-time image | 实时图像</legend>
+          <div class="layui-field-box">
+            <canvas id="myCanvas" width="320" height="570"></canvas>
+            <!-- <img class="image" :src="src" alt="image"> -->
+          </div>
+        </fieldset>
+      </div>
+      <div class="control">
+        <fieldset class="layui-elem-field">
+          <legend>Real-time data | 实时数据</legend>
+          <div class="layui-field-box data-box">
+            <p>当前坐标: {{now.x}}, {{now.y}}</p>
+            <p>目标坐标: {{next.x}}, {{next.y}}</p>
+            <p>跳跃距离: {{dis}}</p>
+            <p>跳跃系数: {{speed}}</p>
+          </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+          <legend>Console | 控制台</legend>
+          <div class="layui-field-box">
+            <div class="control-group">
+              <div class="layui-btn-group">
+                <button :disabled="jumping" @click="connect" type="button" :class="{'layui-btn-disabled': jumping, 'layui-btn': true }">远程连接手机</button>
+                <button :disabled="jumping" @click="setPort" type="button" :class="{'layui-btn-disabled': jumping, 'layui-btn': true }">设置远程端口</button>
+                <button @click="getAdbStatus" type="button" class="layui-btn">获取ADB状态</button>
+                <button :disabled="jumping" @click="restartAdb" type="button" :class="{'layui-btn-disabled': jumping, 'layui-btn': true }">重启ADB服务</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="layui-btn-group">
+                <button v-if="!jumping" @click="autoJump" type="button" class="layui-btn">开始自动跳跃</button>
+                <button v-if="jumping" @click="stopJump" type="button" class="layui-btn">停止自动跳跃</button>
+                <button :disabled="jumping" @click="jumpOneStep" type="button" :class="{'layui-btn-disabled': jumping, 'layui-btn': true }">跳一步</button>
+                <button @click="setSpeed" type="button" class="layui-btn">设置系数</button>
+                <button @click="clearLog" type="button" class="layui-btn">清空日志</button>
+                <button @click="getData" type="button" class="layui-btn">刷新数据</button>
+              </div>
+              <pre class="log">{{log}}</pre>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  let myConsole = new Vue({
+    el: '#app',
+    data() {
+      return {
+        speed: 00,
+        jumping: false,
+        now: {
+          x: 00,
+          y: 00
+        },
+        next: {
+          x: 00,
+          y: 00
+        },
+        dis: 00,
+        src: '/image.png',
+        log: '系统准备就绪\n'
+      }
+    },
+    methods: {
+      async getData() {
+        this.getImage()
+        await this.getXY()
+        load()
+      },
+      reConnect() {
+        this.server = true
+      },
+      async getAutoStatus() {
+        try {
+          let res = await axios.get('/api/getXY')
+          this.jumping = res.data === 'true'
+        } catch (error) {
+          this.addLog('[ERROR]:')
+          this.addLog(error)
+        }
+      },
+      async getXY() {
+        try {
+          let res = await axios.get('/api/getXY')
+          this.now.x = res.data.StartX
+          this.now.y = res.data.StartY
+          this.next.x = res.data.EndX
+          this.next.y = res.data.EndY
+          this.dis = res.data.Dis
+          this.speed = res.data.Speed
+        } catch (error) {
+          this.addLog('[ERROR]:')
+          this.addLog(error)
+        }
+      },
+      async autoJump() {
+        this.addLog('$ [开始自动跳跃]')
+        try {
+          let res = await axios.post('/api/autoJump')
+          this.addLog(res.data)
+          this.jumping = true
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      async jumpOneStep() {
+        this.addLog('$ [跳一跳]')
+        try {
+          let res = await axios.post('/api/jump')
+          await this.getData()
+          this.addLog(res.data)
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      async stopJump() {
+        this.addLog('$ [停止自动跳跃]')
+        try {
+          let res = await axios.post('/api/stopJump')
+          this.addLog(res.data)
+          this.jumping = false
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      getImage() {
+        this.src = '/image.png?t=' + new Date().getTime()
+      },
+      clearLog() {
+        this.log = ''
+      },
+      addLog(str) {
+        this.log += str + '\n'
+        setTimeout(() => {
+          document.getElementsByClassName("log")[0].scrollTop = 9999
+        }, 100)
+      },
+      async getAdbStatus() {
+        this.addLog('$ [获取ADB状态]')
+        try {
+          let res = await axios.get('/api/adbStatus')
+          this.addLog(res.data)
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      async restartAdb() {
+        this.addLog('$ [重启ADB服务]')
+        try {
+          let res = await axios.post('/api/restartAdb')
+          this.addLog(res.data)
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      async setPort() {
+        this.addLog('$ [设置远程端口]')
+        try {
+          let res = await axios.post('/api/setPort')
+          this.addLog(res.data)
+        } catch (error) {
+          this.addLog('发生错误：')
+          this.addLog(error)
+        }
+      },
+      async setSpeed() {
+        this.addLog('$ [设置系数]')
+        layer.prompt({
+          value: '2.1',
+          title: '请输入系数'
+        }, async (value, index, elem) => {
+          try {
+            let res = await axios.post('/api/setSpeed?speed=' + value)
+            this.addLog(res.data)
+            this.getXY()
+          } catch (error) {
+            this.addLog('发生错误：')
+            this.addLog(error)
+          }
+          layer.close(index);
+        })
+      },
+      async connect() {
+        this.addLog('$ [远程连接手机]')
+        layer.prompt({
+          value: '192.168.1.',
+          title: '请输入IP地址'
+        }, async (value, index, elem) => {
+          try {
+            let res = await axios.post('/api/connect?ip=' + value)
+            this.addLog(res.data)
+          } catch (error) {
+            this.addLog('发生错误：')
+            this.addLog(error)
+          }
+          layer.close(index);
+        })
+      }
+    }
+  })
+  setInterval(async () => {
+    if (myConsole.jumping) {
+      myConsole.getImage()
+      await myConsole.getXY()
+      load()
+    }
+  }, 1000)
+
+  function drawBeauty(beauty) {
+    var mycv = document.getElementById("myCanvas")
+    var myctx = mycv.getContext("2d")
+    myctx.beginPath()
+    myctx.drawImage(beauty, 0, 0, 320, 570)
+    myctx.strokeStyle = "#ff0000"
+    myctx.lineWidth = 10
+    myctx.arc(myConsole.now.x / 720 * 320, (myConsole.now.y - 150) / 1024 * 570, 6, 0, Math.PI * 2, true)
+    myctx.stroke()
+    myctx.arc(myConsole.next.x / 720 * 320, (myConsole.next.y - 120) / 1024 * 570, 6, 0, Math.PI * 2, true)
+    myctx.stroke()
+  }
+
+  function load() {
+    var beauty = new Image()
+    beauty.src = myConsole.src
+    if (beauty.complete) {
+      drawBeauty(beauty)
+    } else {
+      beauty.onload = function() {
+        drawBeauty(beauty)
+      }
+    }
+  }
+  async function initial() {
+    await myConsole.getAutoStatus()
+    await myConsole.getData()
+    load()
+  }
+  initial()
+
+</script>
+
+</html>
