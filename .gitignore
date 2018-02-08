@@ -4,3 +4,4 @@ cmd/adb.exe
 cmd/AdbWinApi.dll
 cmd/Thumbs.db
 cmd/lib/*
+*.exe
