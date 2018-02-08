@@ -32,7 +32,7 @@ func colorSimilar(a, b [3]int, distance float64) bool {
 func Find(pic image.Image) ([]int, []int) {
 	pic = resize.Resize(720, 0, pic, resize.Lanczos3)
 
-	if true {
+	if false {
 		go SavePNG("jump.720.png", pic)
 	}
 

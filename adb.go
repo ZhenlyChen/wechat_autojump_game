@@ -35,7 +35,6 @@ func runAdb(args ...string) string {
 	cmd := exec.Command(".\\lib\\adb.exe", args...)
 	cmd.Stdout = &b
 	cmd.Stderr = &b
-	// log.Printf("adb %s", strings.Join(args, " "))
 	err := cmd.Run()
 	if cmd.Process != nil {
 		cmd.Process.Kill()

@@ -33,6 +33,7 @@ func Run() {
 		SaveScreenShot()
 		start, end := GetLocation()
 		distance := GetDistance(start, end)
+		NextStep = distance
 		fmt.Printf("Current Location: %v, %v\nNext Location: %v,  %v\nThe Distance: %v\n", start[0], start[1], end[0], end[1], distance)
 		Jump(distance)
 	}

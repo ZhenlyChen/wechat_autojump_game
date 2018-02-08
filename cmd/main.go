@@ -23,11 +23,11 @@ func init() {
 }
 func main() {
 	r := gin.Default()
-	r.Static("/console", "./public")  // 静态文件
-	r.GET("/", func(c *gin.Context) { // 跳转到主页
+	r.Static("/console", "./public")
+	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/console/")
 	})
-	r.StaticFile("/image.png", "./jump.720.png") // 截图
+	r.StaticFile("/image.png", "./tmp_jump.png")
 	r.GET("/api/adbStatus", func(c *gin.Context) {
 		str := g.ExecAdb("devices")
 		c.String(http.StatusOK, str)
@@ -70,33 +70,33 @@ func main() {
 		start, end := g.GetLocation()
 		dis := g.GetDistance(start, end)
 		g.NextStep = dis
-		g.Jump(g.NextStep)
-		c.String(http.StatusOK, "OK")
+		go g.Jump(g.NextStep)
+		c.String(http.StatusOK, "成功")
 	})
 	r.POST("/api/autoJump", func(c *gin.Context) {
 		if g.AutoJump {
-			c.String(http.StatusBadRequest, "已经在运行")
+			c.String(http.StatusOK, "服务已经在运行")
 		} else {
 			g.AutoJump = true
 			go g.Run()
-			c.String(http.StatusOK, "OK")
+			c.String(http.StatusOK, "自动跳一跳开始...")
 		}
 	})
 	r.POST("/api/setSpeed", func(c *gin.Context) {
 		speed, err := strconv.ParseFloat(c.Query("speed"), 64)
 		g.Speed = speed
 		if err == nil {
-			c.String(http.StatusOK, "OK")
+			c.String(http.StatusOK, "设置参数为"+c.Query("speed"))
 		} else {
 			c.String(http.StatusOK, "参数无效")
 		}
 	})
 	r.POST("/api/stopJump", func(c *gin.Context) {
 		if !g.AutoJump {
-			c.String(http.StatusBadRequest, "没有运行")
+			c.String(http.StatusOK, "服务没有运行")
 		} else {
 			g.AutoJump = false
-			c.String(http.StatusOK, "OK")
+			c.String(http.StatusOK, "已停止自动跳一跳")
 		}
 	})
 	cmd := exec.Command("cmd", "/C", "start", "http://localhost:8080") // 启动浏览器
@@ -105,7 +105,4 @@ func main() {
 		fmt.Println(err)
 	}
 	http.ListenAndServe(":8080", r)
-	/* for {
-		g.Run()
-	} */
 }
