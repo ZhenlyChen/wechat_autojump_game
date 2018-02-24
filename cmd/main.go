@@ -23,9 +23,9 @@ func init() {
 }
 func main() {
 	r := gin.Default()
-	r.Static("/console", "./public")
+	r.Static("/public/", "./public")
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/console/")
+		c.Redirect(302, "public/")
 	})
 	r.StaticFile("/image.png", "./tmp_jump.png")
 	r.GET("/api/adbStatus", func(c *gin.Context) {

@@ -5,3 +5,4 @@ cmd/AdbWinApi.dll
 cmd/Thumbs.db
 cmd/lib/*
 *.exe
+cmd/tmp_jump.png

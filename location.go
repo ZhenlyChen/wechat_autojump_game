@@ -8,7 +8,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var ExcludedHeight = 350
+var ExcludedHeight = 430
 var ExcludedWeight = 25
 var BottleColor = [3]int{55, 56, 97}
 
